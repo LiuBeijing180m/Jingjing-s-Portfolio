@@ -3527,7 +3527,7 @@ function candleWords(project, lang) {
   const defaults = candleCaseCopy[lang];
   const overrides = project.candleCopy?.[lang];
   if (!overrides) return defaults;
-  const words = structuredClone(defaults);
+  const words = JSON.parse(JSON.stringify(defaults));
   for (const path of candleCopyKeys) {
     if (typeof overrides[path] !== 'string') continue;
     const keys = path.split('.');
@@ -3908,7 +3908,7 @@ const siteHeader = document.querySelector('#site-header');
 const siteContent = document.querySelector('#site-content');
 const siteFooter = document.querySelector('#site-footer');
 const initialSettings = JSON.parse(document.querySelector('#portfolio-settings').textContent);
-let settings = structuredClone(initialSettings);
+let settings = JSON.parse(JSON.stringify(initialSettings));
 const hasEditor = Boolean(document.querySelector('#editor'));
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const hoverPointer = window.matchMedia('(hover: hover) and (pointer: fine)');
@@ -4232,7 +4232,7 @@ function renderHome(lang, words, labels) {
       section.append(grid);
     } else {
       renderHomeRows(section, projects, lang, labels);
-      hasRowPreviews ||= projects.some(rowPreviewSource);
+      hasRowPreviews = hasRowPreviews || projects.some(rowPreviewSource);
     }
     siteContent.append(section);
   }
@@ -4465,7 +4465,9 @@ function renderProject(project, lang, labels) {
   const back = navLink('← ' + labels.back, routeUrl(lang));
   back.className = 'case-back';
   const hero = element('div', 'case-hero');
-  const genres = (copy.genre || '').split(/[,，、;；/／|｜·\r\n]+|(?<=\p{Script=Han})[^\S\r\n]+(?=\p{Script=Han})/u)
+  const genres = (copy.genre || '')
+    .replace(/(\p{Script=Han})[^\S\r\n]+(?=\p{Script=Han})/gu, '$1\n')
+    .split(/[,，、;；/／|｜·\r\n]+/)
     .map(genre => genre.trim()).filter(Boolean);
   if (genres.length) {
     const list = element('ul', 'case-genres');
